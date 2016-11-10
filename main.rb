@@ -15,9 +15,8 @@ end
 
 extractor = Segment.new(options)
 
-
-
-
-puts 'Data downloaded.'
-
-exit 0
+if extractor.download == true
+  then puts 'Data downloaded.'
+       exit 0
+  else exit 1
+end
