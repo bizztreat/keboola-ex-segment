@@ -58,7 +58,7 @@ class Segment
 
       CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '`', :col_sep => '|') do |row|
 
-        CSV.open(@out_file, "ab", :col_sep => '|', :encoding => 'utf-8') do |rows|
+        CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
             rows << row
         end
 
