@@ -45,18 +45,20 @@ class Segment
       reap = client.get_object({ bucket: @s3_bucket, key: key }, target: @in_file)
 
       Zlib::GzipReader.open(@in_file) do | input_stream |
-        File.open(@in_file_decompressed, "a", :quote_char => '`', :col_sep => '|') do |output_stream|
+        File.open(@in_file_decompressed, "a", :quote_char => '|') do |output_stream|
           IO.copy_stream(input_stream, output_stream)
         end
       end
 
       }
 
-      CSV.open(@out_file, "ab", :col_sep => '|', :encoding => 'utf-8') do |header|
+      CSV.open(@out_file, "ab", :encoding => 'utf-8') do |header|
           header << ["data"]
       end
 
       CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '`', :col_sep => '|') do |row|
+
+        row.encode('UTF-8', :invalid => :replace, :undef => :replace)
 
         CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
             rows << row
