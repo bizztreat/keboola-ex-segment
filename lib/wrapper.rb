@@ -52,13 +52,13 @@ class Segment
 
       }
 
-      CSV.open(@out_file, "ab", :encoding => 'utf-8') do |header|
+      CSV.open(@out_file, "ab", :col_sep => '|') do |header|
           header << ["data"]
       end
 
       CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '`', :col_sep => '|') do |row|
 
-        CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
+        CSV.open(@out_file, "ab") do |rows|
             rows << row
         end
 
