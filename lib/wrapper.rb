@@ -45,7 +45,7 @@ class Segment
       reap = client.get_object({ bucket: @s3_bucket, key: key }, target: @in_file)
 
       Zlib::GzipReader.open(@in_file) do | input_stream |
-        File.open(@in_file_decompressed, "a", :quote_char => '|') do |output_stream|
+        File.open(@in_file_decompressed, "a", :quote_char => '`', :col_sep => '|') do |output_stream|
           IO.copy_stream(input_stream, output_stream)
         end
       end
