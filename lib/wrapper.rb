@@ -59,7 +59,7 @@ class Segment
       CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '§', :col_sep => '|') do |row|
 
         r = row
-        if r.to_s.include? "clearbit_" then puts "clearbit row escaped"
+        if r.to_s.include? "clearbit_company_description" then puts "clearbit row escaped"
 
         else
 
