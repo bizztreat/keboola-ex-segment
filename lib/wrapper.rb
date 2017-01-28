@@ -59,11 +59,11 @@ class Segment
       CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '§', :col_sep => '|') do |row|
 
         r = row
-        if r.to_s.include? "clearbit" then puts "clearbit row escaped"
+        if r.to_s.include? "clearbit_" then puts "clearbit row escaped"
 
         else
 
-          CSV.open('out.csv', "ab", :encoding => 'utf-8') do |rows|
+          CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
               rows << row
           end
 
