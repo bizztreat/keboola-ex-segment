@@ -63,7 +63,7 @@ class Segment
 
         else
 
-          CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
+          CSV.open(@out_file, "ab", :encoding => 'utf-8', :col_sep => '|') do |rows|
               rows << row
           end
 
