@@ -59,13 +59,17 @@ class Segment
       CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '∑', :col_sep => '|') do |row|
 
         r = row
-        if r.to_s.include? "clearbit_" then puts "clearbit row escaped"
-
+        if r.to_s.include? "clearbit_"
+          then puts "clearbit row escaped"
         else
+           if r.to_s =~ /""search_string"":""([^,"]*)","([^,"]*)""/ then puts "search string replaced"
 
-          CSV.open(@out_file, "ab", :encoding => 'utf-8', :col_sep => '|') do |rows|
-              rows << row
-          end
+           else
+
+             CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
+               rows << row
+            end
+            end
 
         end
 
