@@ -62,7 +62,7 @@ class Segment
         if r.to_s.include? "clearbit_"
           then puts "clearbit row escaped"
         else
-           if r.to_s =~ /""search_string"":""([^,"]*)","([^,"]*)""/ then puts "search string replaced"
+           if r.to_s.include? '\"\"search_string\"\":\"\"Android\",\"Both\"\"' then puts "search string replaced" 
 
            else
 
