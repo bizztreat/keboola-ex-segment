@@ -63,9 +63,9 @@ class Segment
           then puts "clearbit row escaped"
         else
            if r.to_s.include? 'Features search used' then puts "problematic event escaped" 
-                   else
+           else
            if r.to_s.include? 'assign to release' then puts "problematic event escaped" 
-               
+           else
                 if r.to_s.include? '"," ' then puts "problematic event escaped" 
 
            else
