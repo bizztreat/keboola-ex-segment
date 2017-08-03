@@ -72,7 +72,7 @@ class Segment
                rows << row
             end
             end
-
+            end
         end
 
       end
