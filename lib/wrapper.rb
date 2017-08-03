@@ -71,7 +71,7 @@ class Segment
                 if r.to_s.include? '"," p' then puts "problematic event skipped" 
 
            else
-
+             puts  r
              CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
                rows << row
             end
