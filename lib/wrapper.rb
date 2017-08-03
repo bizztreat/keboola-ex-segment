@@ -66,12 +66,12 @@ class Segment
            else
            if r.to_s.include? 'assign to release' then puts "problematic event escaped" 
            else
-                if r.to_s.include? '"," s' then puts "problematic event skipped" 
+                if r.to_s.include? '\",\"" s' then puts "problematic event skipped" 
                       else
-                if r.to_s.include? '"," p' then puts "problematic event skipped" 
+                if r.to_s.include? '\",\"" p' then puts "problematic event skipped" 
 
            else
-             puts  r
+             
              CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
                rows << row
             end
