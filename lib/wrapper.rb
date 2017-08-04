@@ -66,7 +66,7 @@ class Segment
            else
            if r.to_s.include? 'assign to release' then puts "problematic event escaped" 
            else
-                if r.to_s.include? '\", \" ' then puts "problematic event skipped"
+                if r.to_s.include? "\", \" " then puts "problematic event skipped"
 
            else
              
