@@ -16,12 +16,18 @@ class Segment
     @access_key = @config['parameters']['#access_key']
     @secret_access_key = @config['parameters']['#secret_access_key']
     @region = @config['parameters']['region']
-    @olderThan = Integer(@config['parameters']['olderThan']) # days
-    @olderThanLimit = Time.now - (60 * 60 * 24) * @olderThan
+    @olderThan = @config['parameters']['olderThan'] # days
     @countOk = 0
     @countSkip = 0
 
-    puts "* Files changed after (#{@olderThanLimit})"
+    puts '* Version 1.1.1'
+    if @olderThan.nil? || @olderThan == '0'
+    then
+      puts '* All files.'
+    else
+      @olderThanLimit = Time.now - (60 * 60 * 24) * Integer(@olderThan)
+      puts "* Files changed after (#{@olderThanLimit})"
+    end
 
     @in_file = options[:data] + '/in/tables/file.gz'
     @in_file_decompressed = options[:data] + '/in/tables/file.csv'
@@ -60,7 +66,7 @@ class Segment
 
       reap = client.get_object({bucket: @s3_bucket, key: key}, target: @in_file)
 
-      if reap.last_modified >= @olderThanLimit
+      if @olderThanLimit.nil? || reap.last_modified >= @olderThanLimit
       then
         #puts "Procesing ... (#{reap.last_modified}) #{key} "
         Zlib::GzipReader.open(@in_file) do |input_stream|
