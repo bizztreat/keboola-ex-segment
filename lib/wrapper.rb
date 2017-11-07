@@ -2,24 +2,36 @@ require 'aws-sdk'
 require 'zlib'
 require 'csv'
 require 'optparse'
+require 'date'
 
 class Segment
 
   def initialize(options)
 
+    #@config = JSON.parse(File.read('local/config-trial.json'))
     @config = JSON.parse(File.read(options[:data] + '/config.json'))
-    @out_bucket = @config["parameters"]["outputbucket"]
-    @s3_bucket = @config["parameters"]["s3_bucket"]
-    @s3_prefix = @config["parameters"]["s3_prefix"]
-    @access_key = @config["parameters"]["#access_key"]
-    @secret_access_key = @config["parameters"]["#secret_access_key"]
-    @region = @config["parameters"]["region"]
+    @out_bucket = @config['parameters']['outputbucket']
+    @s3_bucket = @config['parameters']['s3_bucket']
+    @s3_prefix = @config['parameters']['s3_prefix']
+    @access_key = @config['parameters']['#access_key']
+    @secret_access_key = @config['parameters']['#secret_access_key']
+    @region = @config['parameters']['region']
+    @olderThan = Integer(@config['parameters']['olderThan']) # days
+    @olderThanLimit = Time.now - (60 * 60 * 24) * @olderThan
+    @countOk = 0
+    @countSkip = 0
+
+    puts "* Files changed after (#{@olderThanLimit})"
 
     @in_file = options[:data] + '/in/tables/file.gz'
     @in_file_decompressed = options[:data] + '/in/tables/file.csv'
     @out_file = options[:data] + '/out/tables/out.csv'
 
-    @kbc_api_token = ENV["KBC_TOKEN"]
+    #@in_file = 'local/in/tables/file.gz'
+    #@in_file_decompressed = 'local/in/tables/file.csv'
+    #@out_file = 'local/out/tables/out.csv'
+
+    @kbc_api_token = ENV['KBC_TOKEN']
 
   end
 
@@ -41,46 +53,70 @@ class Segment
 
     data_files.each {|key|
 
-      puts key
+      if !key.include? '.gz'
+        puts "* Folder * #{key}"
+        next
+      end
+
       reap = client.get_object({bucket: @s3_bucket, key: key}, target: @in_file)
 
-      Zlib::GzipReader.open(@in_file) do |input_stream|
-        File.open(@in_file_decompressed, "a", :quote_char => '∑', :col_sep => '|') do |output_stream|
-          IO.copy_stream(input_stream, output_stream)
+      if reap.last_modified >= @olderThanLimit
+      then
+        #puts "Procesing ... (#{reap.last_modified}) #{key} "
+        Zlib::GzipReader.open(@in_file) do |input_stream|
+          File.open(@in_file_decompressed, 'a', :quote_char => '∑', :col_sep => '|') do |output_stream|
+            IO.copy_stream(input_stream, output_stream)
+          end
         end
+        @countOk += 1
+      else
+        #puts "Old ... (#{reap.last_modified}) #{key} "
+        @countSkip += 1
       end
 
     }
 
-    CSV.open(@out_file, "ab", :col_sep => '|') do |header|
-      header << ["data"]
+    puts "* New files processed: #{@countOk}"
+    puts "* Old files skipped: #{@countSkip}"
+
+    CSV.open(@out_file, 'ab', :col_sep => '|') do |header|
+      header << ['data']
     end
+
+    puts '* Writing data to the output. It may take a minutes!'
 
     CSV.foreach(@in_file_decompressed, :encoding => 'utf-8', :quote_char => '∑', :col_sep => '|') do |row|
 
+      msg = ''
       r = row
-      if r.to_s.include? "clearbit_"
+      if r.to_s.include? 'clearbit_'
       then
-        puts "clearbit row escaped"
+        msg = 'clearbit row escaped'
       else
-        if r.to_s.include? 'Features search used' then
-          puts "problematic event escaped"
+        if r.to_s.include? 'Features search used'
+        then
+          msg = 'problematic event escaped'
         else
-          if r.to_s.include? 'assign to release' then
-            puts "problematic event escaped"
+          if r.to_s.include? 'assign to release'
+          then
+            msg = 'problematic event escaped'
           else
-            if r.to_s.include? "\", \" " then
-              puts "problematic event skipped"
-
+            if r.to_s.include? "\", \" "
+            then
+              msg = 'problematic event skipped'
             else
-
-              CSV.open(@out_file, "ab", :encoding => 'utf-8') do |rows|
+              CSV.open(@out_file, 'ab', :encoding => 'utf-8') do |rows|
                 rows << row
               end
             end
           end
         end
       end
+
+      ## Info message
+      #if msg.to_s.strip.empty?
+      #  puts "Warning: #{msg}"
+      #end
 
     end
 
