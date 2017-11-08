@@ -20,7 +20,7 @@ For destination bucket use according your needs.
   "#access_key": "ACCESS KEY",
   "#secret_access_key": "API SECRET",
   "region": "us-east-1",
-  "olderThan": "<number>"
+  "changed_in_last_days": "<number>"
 }
 </pre>
 
@@ -29,7 +29,7 @@ For destination bucket use according your needs.
 - `#access_key` is your S3 access key  
 - `#secret_access_key` is your S3 secret access key  
 - `region` is where your data is stored
-- `olderThan` is optional. If missing or has value 0 it load all files. With number it loads files old for number of days.  
+- `changed_in_last_days` is optional. If missing or has value 0 it load all files. With number it loads files old for number of days.  
 
 ## Contact
 
