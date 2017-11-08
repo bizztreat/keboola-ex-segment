@@ -16,11 +16,11 @@ class Segment
     @access_key = @config['parameters']['#access_key']
     @secret_access_key = @config['parameters']['#secret_access_key']
     @region = @config['parameters']['region']
-    @olderThan = @config['parameters']['olderThan'] # days
+    @olderThan = @config['parameters']['changed_in_last_days'] # days
     @countOk = 0
     @countSkip = 0
 
-    puts '* Version 1.1.1'
+    puts '* Version 1.1.2'
     if @olderThan.nil? || @olderThan == '0'
     then
       puts '* All files.'
