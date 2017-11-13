@@ -43,6 +43,9 @@ class Segment
 
   def download()
 
+    t0 = Time.now
+    puts "Start time: #{t0}"
+
     s3 = Aws::S3::Resource.new(
         access_key_id: @access_key,
         secret_access_key: @secret_access_key,
@@ -57,6 +60,9 @@ class Segment
 
     data_files = s3.bucket(@s3_bucket).objects(prefix: @s3_prefix, delimiter: '').collect(&:key)
 
+    t1 = Time.now
+    puts "T1 After list: #{t1 - t0}s"
+
     data_files.each {|key|
 
       if !key.include? '.gz'
@@ -68,7 +74,7 @@ class Segment
 
       if @olderThanLimit.nil? || reap.last_modified >= @olderThanLimit
       then
-        #puts "Procesing ... (#{reap.last_modified}) #{key} "
+        puts "Procesing ... (#{reap.last_modified}) #{key} "
         Zlib::GzipReader.open(@in_file) do |input_stream|
           File.open(@in_file_decompressed, 'a', :quote_char => '∑', :col_sep => '|') do |output_stream|
             IO.copy_stream(input_stream, output_stream)
@@ -76,7 +82,7 @@ class Segment
         end
         @countOk += 1
       else
-        #puts "Old ... (#{reap.last_modified}) #{key} "
+        puts "Old ... (#{reap.last_modified}) #{key} "
         @countSkip += 1
       end
 
@@ -84,6 +90,9 @@ class Segment
 
     puts "* New files processed: #{@countOk}"
     puts "* Old files skipped: #{@countSkip}"
+
+    t2 = Time.now
+    puts "T2 After unzip: #{t2 - t1}s"
 
     CSV.open(@out_file, 'ab', :col_sep => '|') do |header|
       header << ['data']
@@ -125,6 +134,13 @@ class Segment
       #end
 
     end
+
+    t3 = Time.now
+    puts "T3 After output: #{t3 - t2}s"
+
+    puts "End time: #{t3}"
+    puts "Total time: #{t3 - t0}s"
+
 
     return true
 
