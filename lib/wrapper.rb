@@ -19,8 +19,10 @@ class Segment
     @olderThan = @config['parameters']['changed_in_last_days'] # days
     @countOk = 0
     @countSkip = 0
+    @tSumGet = 0
+    @tSumZip = 0
 
-    puts '* Version 1.1.2'
+    puts '* Version 1.1.3'
     if @olderThan.nil? || @olderThan == '0'
     then
       puts '* All files.'
@@ -70,11 +72,17 @@ class Segment
         next
       end
 
+      t11 = Time.now
+
       reap = client.get_object({bucket: @s3_bucket, key: key}, target: @in_file)
+
+      t12 = Time.now
+      #puts "T11 After get Obj: #{t12 - t11}s"
+      @tSumGet += (t12 - t11)
 
       if @olderThanLimit.nil? || reap.last_modified >= @olderThanLimit
       then
-        puts "Procesing ... (#{reap.last_modified}) #{key} "
+        #puts "Procesing ... (#{reap.last_modified}) #{key} "
         Zlib::GzipReader.open(@in_file) do |input_stream|
           File.open(@in_file_decompressed, 'a', :quote_char => '∑', :col_sep => '|') do |output_stream|
             IO.copy_stream(input_stream, output_stream)
@@ -82,17 +90,23 @@ class Segment
         end
         @countOk += 1
       else
-        puts "Old ... (#{reap.last_modified}) #{key} "
+        #puts "Old ... (#{reap.last_modified}) #{key} "
         @countSkip += 1
       end
 
-    }
+      t13 = Time.now
+      #puts "T11 After Obj unzip: #{t13 - t12}s"
+      @tSumZip += (t13 - t12)
 
-    puts "* New files processed: #{@countOk}"
-    puts "* Old files skipped: #{@countSkip}"
+    }
 
     t2 = Time.now
     puts "T2 After unzip: #{t2 - t1}s"
+    puts "* SUM Time to get objects: #{@tSumGet}s"
+    puts "* SUM Time to unzip objects: #{@tSumZip}s"
+
+    puts "* New files processed: #{@countOk}"
+    puts "* Old files skipped: #{@countSkip}"
 
     CSV.open(@out_file, 'ab', :col_sep => '|') do |header|
       header << ['data']
